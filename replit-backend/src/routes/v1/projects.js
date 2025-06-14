@@ -5,5 +5,5 @@ import {
 } from "../../controllers/projectController.js";
 const router = express.Router();
 router.post("/", createProjectController);
-router.get("/:projectId", getProjectTreeController);
+router.get("/:projectId/tree", getProjectTreeController);
 export default router;
