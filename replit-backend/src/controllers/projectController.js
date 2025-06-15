@@ -4,7 +4,7 @@ import {
 } from "../services/projectService.js";
 
 export const createProjectController = async (req, res) => {
-  const projectId = await createProjectService();
+  const projectid = await createProjectService();
   return res.json({ message: "Project Created", data: projectid });
 };
 

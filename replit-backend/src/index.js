@@ -3,7 +3,10 @@ import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { PORT } from "./config/serverConfig.js";
+import chokidar from "chokidar";
+import path from "path";
 import apiRouter from "./routes/index.js";
+import { handleEditorSocketEvents } from "./socketHandlers/editorHandler.js";
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -25,6 +28,29 @@ app.get("/", (req, res) => {
 
 app.use("/api", apiRouter);
 
+const editorNamespace = io.of("/editor");
+editorNamespace.on("connection", (socket) => {
+  console.log("editor connected");
+
+  let projectId = socket.handshake.query["projectId"];
+  console.log("Porject id recevied after connection", projectId);
+  if (projectId) {
+    var watcher = chokidar.watch(`./project/${projectId}`, {
+      ignored: (path) => path.includes("node_modules"),
+      persistent: true,
+      awaitWriteFinish: 2000,
+      ignoreInitial: true,
+    });
+    watcher.on("all", (event, path) => {
+      console.log(event, path);
+    });
+  }
+  handleEditorSocketEvents(socket);
+  socket.on("disconnect", async () => {
+    await watcher.close();
+    console.log("editor disconnected");
+  });
+});
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
