@@ -48,14 +48,22 @@ export const handleEditorSocketEvents = (socket) => {
 
   socket.on("deleteFile", async ({ pathToFileOrFolder }) => {
     try {
-      const response = await fs.unlink(pathToFileOrFolder);
+      const stats = await fs.stat(pathToFileOrFolder);
+
+      if (stats.isFile()) {
+        await fs.unlink(pathToFileOrFolder);
+      } else if (stats.isDirectory()) {
+        await fs.rm(pathToFileOrFolder, { recursive: true, force: true }); // correct and powerful
+      }
+
       socket.emit("deleteFileSuccess", {
-        data: "File deleted successfully",
+        data: "Deleted successfully",
+        path: pathToFileOrFolder,
       });
     } catch (error) {
-      console.log("Error deleteing the file", error);
+      console.error("Error deleting the file/folder:", error);
       socket.emit("error", {
-        data: "Error deleteing the file",
+        data: `Error deleting: ${error.message}`,
       });
     }
   });

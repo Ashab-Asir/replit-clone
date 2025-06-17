@@ -4,7 +4,6 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { PORT } from "./config/serverConfig.js";
 import chokidar from "chokidar";
-import path from "path";
 import apiRouter from "./routes/index.js";
 import { handleEditorSocketEvents } from "./socketHandlers/editorHandler.js";
 const app = express();
